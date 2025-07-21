@@ -1,20 +1,20 @@
 // static/js/main.js (最終・完全版)
 import { Login } from './views/Login.js';
 import { Cashier } from './views/Cashier.js';
-import { KDS } from './views/KDS.js';
+//import { KDS } from './views/KDS.js';
 import { Admin } from './views/Admin.js';
 import { Shifts } from './views/Shifts.js';
-import { Projector } from './views/Projector.js';
+//import { Projector } from './views/Projector.js';
 import { Results } from './views/Results.js';
 import { Dashboard } from './views/Dashboard.js';
 
 const routes = {
     '/': Login,
     '/cashier': Cashier,
-    '/kitchen': KDS,
+    //'/kitchen': KDS,
     '/admin': Admin,
     '/shifts': Shifts,
-    '/projector': Projector,
+    //'/projector': Projector,
     '/results': Results,
     '/dashboard': Dashboard
 };
