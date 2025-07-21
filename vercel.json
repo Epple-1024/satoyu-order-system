@@ -1,4 +1,14 @@
 {
+  "headers": [
+    {
+      "source": "/static/css/(.*)",
+      "headers": [{ "key": "Content-Type", "value": "text/css" }]
+    },
+    {
+      "source": "/static/js/(.*)",
+      "headers": [{ "key": "Content-Type", "value": "application/javascript" }]
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
