@@ -1,12 +1,12 @@
 {
   "headers": [
     {
-      "source": "/static/css/(.*)",
-      "headers": [{ "key": "Content-Type", "value": "text/css" }]
+      "source": "/js/(.*)",
+      "headers": [ { "key": "Content-Type", "value": "application/javascript" } ]
     },
     {
-      "source": "/static/js/(.*)",
-      "headers": [{ "key": "Content-Type", "value": "application/javascript" }]
+      "source": "/css/(.*)",
+      "headers": [ { "key": "Content-Type", "value": "text/css" } ]
     }
   ],
   "rewrites": [
