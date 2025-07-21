@@ -6,6 +6,7 @@ import { Admin } from './views/Admin.js';
 import { Shifts } from './views/Shifts.js';
 import { Projector } from './views/Projector.js';
 import { Results } from './views/Results.js';
+import { Dashboard } from './views/Dashboard.js';
 
 const routes = {
     '/': Login,

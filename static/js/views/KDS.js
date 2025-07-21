@@ -14,9 +14,18 @@ export const KDS = {
             const ticket = document.createElement('div');
             ticket.className = 'ticket';
             ticket.dataset.id = order.id;
-            const itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
-            ticket.innerHTML = `<div class="ticket-header">注文 #${order.id}</div><ul>${itemsHtml}</ul><div class="ticket-action"></div>`;
-            return ticket;
+        
+            let itemsHtml = '';
+            if (Array.isArray(order.items)) {
+                // new_orderイベント用の処理 (データが配列)
+                itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
+            } else if (order.items_summary) {
+                // 初期読み込み用の処理 (データが文字列)
+                itemsHtml = order.items_summary.split('; ').map(item => `<li>${item}</li>`).join('');
+           }
+        
+           ticket.innerHTML = `<div class="ticket-header">注文 #${order.id}</div><ul>${itemsHtml}</ul><div class="ticket-action"></div>`;
+           return ticket;
         };
         
         const moveTicket = (orderId, newStatus) => {

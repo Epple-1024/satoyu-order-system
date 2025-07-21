@@ -4,7 +4,7 @@ export const Dashboard = {
         <div class="dashboard-card" style="margin:auto;">
             <h3>外部ダッシュボード</h3>
             <p>売上: <span id="dash-sales">---</span>円</p>
-            <p>利益: <span id-="dash-profit">---</span>円</p>
+            <p>利益: <span id="dash-profit">---</span>円</p>
         </div>
     `,
     after_render: async () => {
