@@ -14,7 +14,8 @@ const routes = {
     '/admin': Admin,
     '/shifts': Shifts,
     '/projector': Projector,
-    '/results': Results
+    '/results': Results,
+    '/dashboard': Dashboard
 };
 
 const router = async () => {
