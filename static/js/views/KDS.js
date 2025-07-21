@@ -1,5 +1,5 @@
 import { updateOrderStatus, fetchActiveOrders } from '../api.js';
-import { socket } from '../socket.js';
+import { getSocket } from '../socket.js'; // socketからgetSocketに変更
 
 export const KDS = {
     render: async () => `
@@ -10,6 +10,8 @@ export const KDS = {
         </div>
     `,
     after_render: async () => {
+        const socket = getSocket(); // ここで初めてWebSocket接続を確立
+
         const createTicketElement = (order) => {
             const ticket = document.createElement('div');
             ticket.className = 'ticket';
@@ -17,15 +19,13 @@ export const KDS = {
         
             let itemsHtml = '';
             if (Array.isArray(order.items)) {
-                // new_orderイベント用の処理 (データが配列)
                 itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
             } else if (order.items_summary) {
-                // 初期読み込み用の処理 (データが文字列)
                 itemsHtml = order.items_summary.split('; ').map(item => `<li>${item}</li>`).join('');
-           }
+            }
         
-           ticket.innerHTML = `<div class="ticket-header">注文 #${order.id}</div><ul>${itemsHtml}</ul><div class="ticket-action"></div>`;
-           return ticket;
+            ticket.innerHTML = `<div class="ticket-header">注文 #${order.id}</div><ul>${itemsHtml}</ul><div class="ticket-action"></div>`;
+            return ticket;
         };
         
         const moveTicket = (orderId, newStatus) => {
@@ -33,8 +33,8 @@ export const KDS = {
             if (!ticket) return;
             document.querySelector(`#${newStatus} .kds-tickets`).prepend(ticket);
             const actionDiv = ticket.querySelector('.ticket-action');
-            if (newStatus === 'pending') actionDiv.innerHTML = '<button class="btn btn-primary btn-cook">調理開始</button>';
-            else if (newStatus === 'cooking') actionDiv.innerHTML = '<button class="btn btn-primary btn-ready">完成</button>';
+            if (newStatus === 'pending') actionDiv.innerHTML = '<button class="btn btn-primary btn-sm btn-cook">調理開始</button>';
+            else if (newStatus === 'cooking') actionDiv.innerHTML = '<button class="btn btn-primary btn-sm btn-ready">完成</button>';
             else if (newStatus === 'ready') actionDiv.innerHTML = '<span>お渡し待ち</span>';
         };
 
@@ -50,7 +50,7 @@ export const KDS = {
             document.querySelector('#pending .kds-tickets').prepend(ticketEl);
             moveTicket(order.id, 'pending');
         });
-        socket.on('status_update', ({ order_id, status }) => moveTicket(order_id, status));
+        socket.on('status_update', ({ id, status }) => moveTicket(id, status));
 
         document.querySelector('.kds-container').addEventListener('click', async (e) => {
             const ticket = e.target.closest('.ticket');

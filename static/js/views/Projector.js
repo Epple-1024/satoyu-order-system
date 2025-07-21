@@ -1,5 +1,5 @@
 import { fetchActiveOrders } from '../api.js';
-import { socket } from '../socket.js';
+import { getSocket } from '../socket.js'; // socketからgetSocketに変更
 
 export const Projector = {
     render: async () => `
@@ -27,12 +27,13 @@ export const Projector = {
         </div>
     `,
     after_render: async () => {
+        const socket = getSocket(); // ここで初めてWebSocket接続を確立
+
         const preparingGrid = document.getElementById('preparing-grid');
         const readyGrid = document.getElementById('ready-grid');
         const readySound = document.getElementById('ready-sound');
         const bgmSound = document.getElementById('bgm-sound');
 
-        // ブラウザの自動再生ポリシー対策のため、最初のクリックでBGMを開始
         document.body.addEventListener('click', () => {
             if (bgmSound.paused) {
                 bgmSound.play().catch(e => console.warn("BGM play failed:", e));
@@ -76,7 +77,6 @@ export const Projector = {
             }, { once: true });
         };
 
-        // --- WebSocket Listeners ---
         socket.on('new_order', (order) => {
             const existingTile = preparingGrid.querySelector(`[data-id='${order.id}']`);
             if (existingTile) return;
@@ -90,7 +90,6 @@ export const Projector = {
             }
         });
 
-        // --- Initial Load ---
         try {
             const activeOrders = await fetchActiveOrders();
             activeOrders.forEach(order => {
