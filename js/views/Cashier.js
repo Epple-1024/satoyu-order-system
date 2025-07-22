@@ -3,7 +3,7 @@ import { fetchProducts, postOrder } from '../api.js';
 import { io } from 'https://cdn.socket.io/4.7.5/socket.io.esm.min.js';
 
 const PRINT_SERVER_URL = 'http://fes-printer.local:5001/print';
-const REALTIME_SERVER_URL = 'http://fes-realtime.local:5002';
+const REALTIME_SERVER_URL = 'https://fes-realtime.local:5002';
 
 export const Cashier = {
     render: async () => `

@@ -2,7 +2,7 @@
 import { io } from 'https://cdn.socket.io/4.7.5/socket.io.esm.min.js';
 
 // Raspberry Pi 4Bのリアルタイム中継サーバーに接続
-const REALTIME_SERVER_URL = 'http://fes-realtime.local:5002';
+const REALTIME_SERVER_URL = 'https://fes-realtime.local:5002';
 
 export const CustomerDisplay = {
     render: async () => `
