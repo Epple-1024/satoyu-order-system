@@ -34,6 +34,7 @@ const request = async (functionName, options = {}) => {
 };
 
 // --- API Functions ---
+// エンドポイント名をEdge Function名に合わせる
 export const postLogin = (role, pin) => request('handle-login', { method: 'POST', body: JSON.stringify({ role, pin }) });
 export const fetchProducts = () => request('get-products');
 export const postOrder = (orderData) => request('create-order', { method: 'POST', body: JSON.stringify(orderData) });
@@ -46,16 +47,6 @@ export const fetchShiftAssignments = (date) => request(`get-shift-assignments?da
 export const fetchShiftTemplates = () => request('get-shift-templates');
 export const postShiftAssignment = (assignmentData) => request('create-shift-assignment', { method: 'POST', body: JSON.stringify(assignmentData) });
 export const fetchDailyResults = (date) => request(`get-daily-results?date=${date}`);
-export const postProduct = (productData) => request('/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(productData),
-});
-export const updateProduct = (productId, productData) => request(`/products/${productId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(productData),
-});
-export const deleteProduct = (productId) => request(`/products/${productId}`, {
-    method: 'DELETE',
-});
+export const postProduct = (productData) => request('create-product', { method: 'POST', body: JSON.stringify(productData) }); // create-productを想定
+export const updateProduct = (productId, productData) => request(`update-product/${productId}`, { method: 'PUT', body: JSON.stringify(productData) }); // update-productを想定
+export const deleteProduct = (productId) => request(`delete-product/${productId}`, { method: 'DELETE' }); // delete-productを想定
