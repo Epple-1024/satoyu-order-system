@@ -46,3 +46,16 @@ export const fetchShiftAssignments = (date) => request(`get-shift-assignments?da
 export const fetchShiftTemplates = () => request('get-shift-templates');
 export const postShiftAssignment = (assignmentData) => request('create-shift-assignment', { method: 'POST', body: JSON.stringify(assignmentData) });
 export const fetchDailyResults = (date) => request(`get-daily-results?date=${date}`);
+export const postProduct = (productData) => request('/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(productData),
+});
+export const updateProduct = (productId, productData) => request(`/products/${productId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(productData),
+});
+export const deleteProduct = (productId) => request(`/products/${productId}`, {
+    method: 'DELETE',
+});
