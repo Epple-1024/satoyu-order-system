@@ -30,6 +30,7 @@ export const Admin = {
                 <h3>シフト管理</h3>
                 <a href="#/shifts" class="btn btn-secondary">シフトを編集</a>
             </div>
+            <div class="dashboard-card"><h3>表示画面</h3><a href="#/projector" class="btn">プロジェクター</a> <a href="#/results" class="btn">リザルト</a></div>
         </div>
         <div id="product-modal" class="modal-backdrop" style="display:none;">
             <div class="modal">

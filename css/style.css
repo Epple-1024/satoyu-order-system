@@ -44,7 +44,7 @@ label { display: block; margin-bottom: 8px; font-size: 14px; color: #666; }
 
 /* --- Projector --- */
 .split-container { display: flex; width: 100%; height: 100%; }
-.status-panel { flex-grow: 1; background-color: #000; color: #fff; overflow-y: auto; }
+.status-panel { flex-grow: 1; background-color: var(--card-bg); color: var(--text-primary); overflow-y: auto; }
 .main-container { display: flex; flex-direction: column; height: 100%; padding: 32px; box-sizing: border-box; }
 .status-section { margin-bottom: 32px; }
 .section-header { font-size: 48px; font-weight: bold; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 4px solid; }
@@ -91,3 +91,14 @@ label { display: block; margin-bottom: 8px; font-size: 14px; color: #666; }
 .btn-sm { padding: 4px 8px; font-size: 12px; border-radius: 6px; margin-left: 8px; }
 .btn-edit { background-color: #eee; color: #333; }
 .btn-delete { background-color: var(--system-red); color: white; }
+
+/* --- Customer Display --- */
+.customer-display-container { display: flex; width: 100%; height: 100%; background-color: var(--card-bg); }
+.order-details-panel { flex-grow: 1; padding: 32px; display: flex; flex-direction: column; }
+.order-details-panel .panel-header h1 { font-size: 48px; margin: 0 0 24px 0; }
+.order-items-list { flex-grow: 1; font-size: 32px; }
+.order-item-display { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+.order-item-display .name { font-weight: 500; }
+.order-total-display { font-size: 48px; font-weight: bold; display: flex; justify-content: space-between; padding-top: 24px; border-top: 2px solid var(--text-primary); }
+.side-ad-panel { width: 40%; flex-shrink: 0; background-color: black; }
+.side-ad-panel video { width: 100%; height: 100%; object-fit: cover; }

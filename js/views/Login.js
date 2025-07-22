@@ -20,6 +20,7 @@ export const Login = {
                 </div>
                 <button type="submit" class="btn btn-primary">ログイン</button>
             </form>
+            <a href="#/projector" style="display:block; margin-top:16px;">プロジェクター画面を直接開く</a>
         </div>
     `,
     after_render: () => {

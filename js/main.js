@@ -6,6 +6,7 @@ import { Shifts } from './views/Shifts.js';
 import { Projector } from './views/Projector.js';
 import { Results } from './views/Results.js';
 import { Dashboard } from './views/Dashboard.js';
+import { CustomerDisplay } from './views/CustomerDisplay.js';
 
 const routes = {
     '/': Login,
@@ -15,7 +16,8 @@ const routes = {
     '/shifts': Shifts,
     '/projector': Projector,
     '/results': Results,
-    '/dashboard': Dashboard
+    '/dashboard': Dashboard,
+    '/customer-display': CustomerDisplay
 };
 
 const router = async () => {
