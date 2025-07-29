@@ -1,9 +1,9 @@
-import { Login } from './views/Login.js';
-import { Cashier } from './views/Cashier.js';
-import { KDS } from './views/KDS.js';
+import Login from './views/Login.js';
+import Cashier from './views/Cashier.js';
+import KDS from './views/KDS.js';
 import { Admin } from './views/Admin.js';
 import { Projector } from './views/Projector.js';
-import { Results } from './views/Results.js';
+import Results from './views/Results.js';
 import { Dashboard } from './views/Dashboard.js';
 import { CustomerDisplay } from './views/CustomerDisplay.js';
 
