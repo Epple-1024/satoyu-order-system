@@ -40,12 +40,7 @@ export const fetchProducts = () => request('get-products');
 export const postOrder = (orderData) => request('create-order', { method: 'POST', body: JSON.stringify(orderData) });
 export const updateOrderStatus = (orderId, status) => request(`update-order-status/${orderId}`, { method: 'POST', body: JSON.stringify({ status }) });
 export const fetchActiveOrders = () => request('get-active-orders');
-export const fetchFinancials = () => request('get-financials');
-export const postExpense = (expenseData) => request('create-expense', { method: 'POST', body: JSON.stringify(expenseData) });
 export const fetchUsers = () => request('get-users');
-export const fetchShiftAssignments = (date) => request(`get-shift-assignments?date=${date}`);
-export const fetchShiftTemplates = () => request('get-shift-templates');
-export const postShiftAssignment = (assignmentData) => request('create-shift-assignment', { method: 'POST', body: JSON.stringify(assignmentData) });
 export const fetchDailyResults = (date) => request(`get-daily-results?date=${date}`);
 export const postProduct = (productData) => request('create-product', { method: 'POST', body: JSON.stringify(productData) }); // create-productを想定
 export const updateProduct = (productId, productData) => request(`update-product/${productId}`, { method: 'PUT', body: JSON.stringify(productData) }); // update-productを想定
