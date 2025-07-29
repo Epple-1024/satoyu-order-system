@@ -1,7 +1,9 @@
+import AbstractView from "./AbstractView.js";
 import { fetchFinancials, postExpense, fetchProducts, postProduct, updateProduct, deleteProduct } from '../api.js';
 
-export const Admin = {
-    render: async () => `
+export class Admin extends AbstractView {
+    async render() {
+        return `
         <div class="dashboard-header">
             <h1>管理者ダッシュボード</h1>
             <a href="/" class="btn btn-secondary">ログアウト</a>
@@ -48,8 +50,10 @@ export const Admin = {
                 </form>
             </div>
         </div>
-    `,
-    after_render: async () => {
+    `;
+    }
+
+    async after_render() {
         const financialsCard = document.getElementById('financials-card');
         const expenseForm = document.getElementById('expense-form');
         const productList = document.getElementById('product-list');
@@ -145,4 +149,4 @@ export const Admin = {
         setInterval(renderFinancials, 15000);
         await refreshProducts();
     }
-};
+}

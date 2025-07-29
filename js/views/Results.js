@@ -1,7 +1,7 @@
 // js/views/Results.js (最終確定版・完全版)
 import AbstractView from "./AbstractView.js";
 
-export default class extends AbstractView {
+export class Results extends AbstractView {
     constructor(params) {
         super(params);
         this.setTitle("営業結果");

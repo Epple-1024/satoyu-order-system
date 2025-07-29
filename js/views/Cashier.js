@@ -33,7 +33,7 @@ class Cart {
     }
 }
 
-export default class extends AbstractView {
+export class Cashier extends AbstractView {
     constructor(params) {
         super(params);
         this.setTitle("レジ");

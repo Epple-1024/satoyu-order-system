@@ -1,7 +1,9 @@
+import AbstractView from "./AbstractView.js";
 import { fetchActiveOrders } from '../api.js';
 
-export const Projector = {
-    render: async () => `
+export class Projector extends AbstractView {
+    async render() {
+        return `
         <audio id="ready-sound" src="/assets/sounds/ready.mp3" preload="auto"></audio>
         <audio id="bgm-sound" src="/assets/sounds/bgm.mp3" preload="auto" loop></audio>
         
@@ -24,8 +26,10 @@ export const Projector = {
                 <video src="/assets/videos/ad.mov" autoplay loop muted playsinline></video>
             </div>
         </div>
-    `,
-    after_render: async () => {
+    `;
+    }
+
+    async after_render() {
         const preparingGrid = document.getElementById('preparing-grid');
         const readyGrid = document.getElementById('ready-grid');
         const readySound = document.getElementById('ready-sound');
@@ -87,4 +91,4 @@ export const Projector = {
         await fetchAndUpdate();
         setInterval(fetchAndUpdate, 5000); // 5秒ごとに更新
     }
-};
+}

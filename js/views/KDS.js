@@ -1,7 +1,7 @@
 // js/views/KDS.js (最終確定版・完全版)
 import AbstractView from "./AbstractView.js";
 
-export default class extends AbstractView {
+export class KDS extends AbstractView {
     constructor(params) {
         super(params);
         this.setTitle("厨房モニター (KDS)");

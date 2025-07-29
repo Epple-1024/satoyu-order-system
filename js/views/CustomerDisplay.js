@@ -1,11 +1,12 @@
-// js/views/CustomerDisplay.js (新規作成・完全版)
+import AbstractView from "./AbstractView.js";
 import { io } from 'https://cdn.socket.io/4.7.5/socket.io.esm.min.js';
 
 // Raspberry Pi 4Bのリアルタイム中継サーバーに接続
 const REALTIME_SERVER_URL = 'https://fes-realtime.local:5002';
 
-export const CustomerDisplay = {
-    render: async () => `
+export class CustomerDisplay extends AbstractView {
+    async render() {
+        return `
         <div class="customer-display-container">
             <div class="order-details-panel">
                 <div class="panel-header">
@@ -23,8 +24,10 @@ export const CustomerDisplay = {
                 <video src="/assets/videos/ad.mov" autoplay loop muted playsinline></video>
             </div>
         </div>
-    `,
-    after_render: async () => {
+        `;
+    }
+
+    async after_render() {
         const orderItemsContainer = document.getElementById('customer-order-items');
         const totalAmountEl = document.getElementById('customer-total-amount');
 
@@ -62,4 +65,4 @@ export const CustomerDisplay = {
             renderOrder(orderData);
         });
     }
-};
+}

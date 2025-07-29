@@ -1,12 +1,12 @@
 // main.js (最終修正版)
 
 import { Admin } from './js/views/Admin.js';
-import Cashier from './js/views/Cashier.js';
+import { Cashier } from './js/views/Cashier.js';
 import { CustomerDisplay } from './js/views/CustomerDisplay.js';
-import KDS from './js/views/KDS.js';
-import Login from './js/views/Login.js';
+import { KDS } from './js/views/KDS.js';
+import { Login } from './js/views/Login.js';
 import { Projector } from './js/views/Projector.js';
-import Results from './js/views/Results.js';
+import { Results } from './js/views/Results.js';
 import * as api from './js/api.js';
 
 // APIをグローバルスコープで利用可能にする
