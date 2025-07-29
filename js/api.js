@@ -1,9 +1,9 @@
-// js/api.js (最終修正版)
+// js/api.js (関数名・Admin機能 最終修正版)
 import { supabase } from './supabaseClient.js';
 
-const PRINT_SERVER_URL = 'http://fes-printer.local:5001';
+const PRINT_SERVER_URL = 'https://fes-printer.local'; // ローカルでもHTTPSを想定
 
-// ログイン
+// --- 認証 ---
 export const login = async (role, pin) => {
     const { data, error } = await supabase.functions.invoke('handle-login', {
         body: { role, pin },
@@ -12,43 +12,23 @@ export const login = async (role, pin) => {
     return data;
 };
 
-// 全商品を取得
-export const getProducts = async () => {
+// --- レジ・KDS・プロジェクター関連 ---
+export const fetchProducts = async () => {
     const { data, error } = await supabase.from('products').select('*').order('id');
     if (error) throw new Error(error.message);
     return data;
 };
 
-// 注文を作成
 export const createOrder = async (orderData) => {
     const { data, error } = await supabase.functions.invoke('create-order', {
         body: orderData,
     });
-    if (error) throw new Error(error.data.error);
+    // エラーメッセージの形式を調整
+    if (error) throw new Error(error.message || (error.data ? error.data.error : 'Unknown error'));
     return data;
 };
 
-// レシートを印刷
-export const printReceipt = async (printData) => {
-    try {
-        const response = await fetch(`${PRINT_SERVER_URL}/print`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(printData),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || '印刷サーバーでエラーが発生しました。');
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('印刷エラー:', error);
-        throw new Error('印刷サーバーに接続できませんでした。プリンターの電源とネットワークを確認してください。');
-    }
-};
-
-// アクティブな注文を取得 (KDS用)
-export const getActiveOrders = async () => {
+export const fetchActiveOrders = async () => {
     const { data, error } = await supabase
         .from('orders')
         .select(`*, order_items(*, products(*))`)
@@ -58,7 +38,6 @@ export const getActiveOrders = async () => {
     return data;
 };
 
-// 注文ステータスを更新 (KDS用)
 export const updateOrderStatus = async (orderId, newStatus) => {
     const { data, error } = await supabase
         .from('orders')
@@ -68,7 +47,7 @@ export const updateOrderStatus = async (orderId, newStatus) => {
     return data;
 };
 
-// 注文の変更をリアルタイムで購読 (KDS用)
+// --- リアルタイム ---
 let orderSubscription = null;
 export const subscribeToOrders = (callback) => {
     if (orderSubscription) {
@@ -90,39 +69,25 @@ export const unsubscribeFromOrders = () => {
     }
 };
 
-// 営業結果を取得
-export const getDailyResults = async () => {
+// --- 結果・管理画面関連 ---
+export const fetchDailyResults = async () => {
     const { data, error } = await supabase.rpc('get_daily_summary');
     if (error) throw new Error(error.message);
     return data;
 };
 
-
-// ★★★ ここからが修正箇所です ★★★
-// Admin.jsが必要とする関数に`export`を追加します
-
 export const fetchFinancials = async () => {
-    const { data: salesData, error: salesError } = await supabase.rpc('get_total_sales');
-    if (salesError) throw new Error(salesError.message);
-
-    const { data: expensesData, error: expensesError } = await supabase.rpc('get_total_expenses');
-    if (expensesError) throw new Error(expensesError.message);
-
+    // get_daily_summaryから流用
+    const summary = await fetchDailyResults();
     return {
-        sales: salesData,
-        expenses: expensesData,
-        profit: salesData - expensesData
+        sales: summary.total_sales,
+        expenses: summary.total_cost, // 経費=原価として扱う
+        profit: summary.total_profit
     };
 };
 
 export const postExpense = async (expenseData) => {
     const { data, error } = await supabase.from('expenses').insert(expenseData);
-    if (error) throw new Error(error.message);
-    return data;
-};
-
-export const fetchProducts = async () => {
-    const { data, error } = await supabase.from('products').select('*');
     if (error) throw new Error(error.message);
     return data;
 };
@@ -143,4 +108,23 @@ export const deleteProduct = async (id) => {
     const { data, error } = await supabase.from('products').delete().eq('id', id);
     if (error) throw new Error(error.message);
     return data;
+};
+
+// --- 印刷 ---
+export const printReceipt = async (printData) => {
+    try {
+        const response = await fetch(`${PRINT_SERVER_URL}/print`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(printData),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || '印刷サーバーエラー');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('印刷エラー:', error);
+        throw new Error('印刷サーバーに接続できません。');
+    }
 };
