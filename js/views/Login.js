@@ -1,51 +1,91 @@
-// static/js/views/Login.js
-import { postLogin } from '../api.js';
+// js/views/Login.js (最終確定版・完全版)
+import AbstractView from "./AbstractView.js";
 
-export const Login = {
-    render: () => `
-        <div class="login-card">
-            <h2>SATOYU – Café & Puzzle Lounge</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="role-select">役割を選択</label>
-                    <select id="role-select" name="role" class="form-control">
-                        <option value="cashier">キャッシャー</option>
-                        <option value="kitchen">キッチン</option>
-                        <option value="admin">管理者</option>
-                    </select>
+export default class extends AbstractView {
+    constructor(params) {
+        super(params);
+        this.setTitle("ログイン");
+    }
+
+    async getHtml() {
+        return `
+            <div class="login-container">
+                <div class="login-card">
+                    <h1>SATOYU</h1>
+                    <p>Café & Puzzle Lounge</p>
+                    <div class="role-selector">
+                        <button class="role-btn active" data-role="cashier">レジ</button>
+                        <button class="role-btn" data-role="admin">管理</button>
+                        <button class="role-btn" data-role="kitchen">厨房</button>
+                    </div>
+                    <div class="pin-pad-container">
+                        <input type="password" id="pin-input" class="form-control" readonly placeholder="----" style="text-align: center; font-size: 24px; letter-spacing: 8px;">
+                        <div class="pin-pad">
+                            <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+                            <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+                            <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
+                            <button class="pin-btn clear">C</button><button class="pin-btn">0</button><button class="pin-btn-enter">✓</button>
+                        </div>
+                    </div>
+                    <p id="login-error" class="error-message"></p>
                 </div>
-                <div class="form-group">
-                    <label for="pin-input">PINコード</label>
-                    <input type="password" id="pin-input" name="pin" class="form-control" inputmode="numeric" pattern="[0-9]*" maxlength="4" required>
-                </div>
-                <button type="submit" class="btn btn-primary">ログイン</button>
-            </form>
-            <a href="#/projector" style="display:block; margin-top:16px;">プロジェクター画面を直接開く</a>
-        </div>
-    `,
-    after_render: () => {
-        const form = document.getElementById('login-form');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const role = form.querySelector('#role-select').value;
-            const pin = form.querySelector('#pin-input').value;
-            try {
-                const result = await postLogin(role, pin);
-                if (result.success) {
-                    // 役割に応じてリダイレクト
-                    const redirectMap = {
-                        admin: '#/admin',
-                        cashier: '#/cashier',
-                        kitchen: '#/kitchen'
-                    };
-                    window.location.href = redirectMap[role] || '/';
-                } else {
-                    alert('PINコードが間違っています。');
+            </div>
+        `;
+    }
+
+    afterRender() {
+        let selectedRole = 'cashier';
+        let pin = '';
+        const pinInput = document.getElementById('pin-input');
+        const errorMessage = document.getElementById('login-error');
+
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelector('.role-btn.active').classList.remove('active');
+                btn.classList.add('active');
+                selectedRole = btn.dataset.role;
+            });
+        });
+
+        document.querySelectorAll('.pin-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                errorMessage.textContent = '';
+                if (btn.classList.contains('clear')) {
+                    pin = '';
+                } else if (pin.length < 4) {
+                    pin += btn.textContent;
                 }
-            } catch (err) {
-                alert('ログインに失敗しました。');
-                console.error(err);
+                pinInput.value = '•'.repeat(pin.length);
+            });
+        });
+        
+        document.querySelector('.pin-btn-enter').addEventListener('click', async () => {
+            if (pin.length < 4 && !['kitchen'].includes(selectedRole)) {
+                 errorMessage.textContent = 'PINは4桁で入力してください。';
+                 return;
+            }
+            
+            if (selectedRole === 'kitchen') {
+                window.location.href = '/kitchen';
+                return;
+            }
+
+            try {
+                const result = await window.api.login(selectedRole, pin);
+                if (result) {
+                    localStorage.setItem('user_role', result.role);
+                    if(result.role === 'admin') {
+                        window.location.href = '/admin';
+                    } else {
+                        const registerId = localStorage.getItem('register_id') || 1;
+                        window.location.href = `/cashier/${registerId}`;
+                    }
+                }
+            } catch (error) {
+                errorMessage.textContent = '役割またはPINが正しくありません。';
+                pin = '';
+                pinInput.value = '';
             }
         });
     }
-};
+}
