@@ -1,39 +1,86 @@
-import Login from './views/Login.js';
-import Cashier from './views/Cashier.js';
-import KDS from './views/KDS.js';
-import { Admin } from './views/Admin.js';
-import { Projector } from './views/Projector.js';
-import Results from './views/Results.js';
-import { Dashboard } from './views/Dashboard.js';
-import { CustomerDisplay } from './views/CustomerDisplay.js';
+// main.js (最終修正版)
 
-const routes = {
-    '/': Login,
-    '/cashier': Cashier,
-    '/kitchen': KDS,
-    '/admin': Admin,
-    '/projector': Projector,
-    '/results': Results,
-    '/dashboard': Dashboard,
-    '/customer-display': CustomerDisplay
-};
+import { Admin } from './js/views/Admin.js';
+import Cashier from './js/views/Cashier.js';
+import { CustomerDisplay } from './js/views/CustomerDisplay.js';
+import KDS from './js/views/KDS.js';
+import Login from './js/views/Login.js';
+import { Projector } from './js/views/Projector.js';
+import Results from './js/views/Results.js';
+import * as api from './js/api.js';
+
+// APIをグローバルスコープで利用可能にする
+window.api = api;
+
+let currentView = null;
 
 const router = async () => {
-    const app = document.getElementById('app');
-    const request = location.hash.slice(1).toLowerCase() || '/';
-    const page = routes[request] || { 
-        render: () => `<h1>404 Not Found</h1>`, 
-        after_render: () => {} 
-    };
+    const routes = [
+        { path: "/", view: Login },
+        { path: "/login", view: Login },
+        { path: "/cashier/:id", view: Cashier },
+        { path: "/kitchen", view: KDS },
+        { path: "/display/:id", view: CustomerDisplay },
+        { path: "/projector", view: Projector },
+        { path: "/admin", view: Admin },
+        { path: "/results", view: Results }
+    ];
+
+    const potentialMatches = routes.map(route => {
+        return {
+            route: route,
+            isMatch: location.pathname === route.path || (route.path.includes(":") && location.pathname.match(pathToRegex(route.path)))
+        };
+    });
+
+    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+
+    if (!match) {
+        match = { route: routes[0], isMatch: true }; // Not found, redirect to login
+        history.pushState(null, null, "/");
+    }
     
-    try {
-        app.innerHTML = await page.render();
-        await page.after_render();
-    } catch (e) {
-        console.error("Error rendering page:", e);
-        app.innerHTML = `<h1>Application Error</h1><p>ページの描画中にエラーが発生しました。</p>`;
+    // 前のビューのクリーンアップ処理を呼び出す
+    if (currentView && typeof currentView.destroy === 'function') {
+        currentView.destroy();
+    }
+
+    const view = new match.route.view(getParams(match));
+    currentView = view; // 現在のビューを保持
+
+    // ★★★ エラー修正箇所 ★★★
+    // `view.render()`ではなく、正しく`view.getHtml()`を呼び出す
+    document.querySelector("#app").innerHTML = await view.getHtml();
+    
+    // afterRenderはDOM描画後に呼び出す
+    if (typeof view.afterRender === 'function') {
+        view.afterRender();
     }
 };
 
-window.addEventListener('hashchange', router);
-window.addEventListener('load', router);
+const navigateTo = url => {
+    history.pushState(null, null, url);
+    router();
+};
+
+const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+
+const getParams = match => {
+    if (!match.route.path.includes(":")) return {};
+    const values = location.pathname.match(pathToRegex(match.route.path)).slice(1);
+    const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
+    return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+};
+
+
+window.addEventListener("popstate", router);
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("click", e => {
+        if (e.target.matches("[data-link]")) {
+            e.preventDefault();
+            navigateTo(e.target.href);
+        }
+    });
+    router();
+});
