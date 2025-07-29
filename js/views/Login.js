@@ -12,7 +12,7 @@ export const Login = class extends AbstractView {
             <div class="login-container">
                 <div class="login-card">
                     <h1>SATOYU</h1>
-                    <p>Café & Puzzle Lounge</p>
+                    <p>- Café & Puzzle Lounge</p>
                     
                     <div class="form-group">
                         <label for="role-select">役割を選択</label>
@@ -30,7 +30,7 @@ export const Login = class extends AbstractView {
 
                     <button id="login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 12px;">ログイン</button>
                     
-                    <a href="/projector" class="btn btn-secondary" style="width: 100%;" data-link>プロジェクター画面へ</a>
+                    <a href="/views/Projector.js" class="btn btn-secondary" style="width: 100%;" data-link>プロジェクター画面へ</a>
                     
                     <p id="login-error" class="error-message" style="margin-top: 16px;"></p>
                 </div>
