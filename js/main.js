@@ -1,13 +1,13 @@
-// main.js (最終修正版)
+// main.js（最終完全修正版）
 
-import { Admin } from './js/views/Admin.js';
-import { Cashier } from './js/views/Cashier.js';
-import { CustomerDisplay } from './js/views/CustomerDisplay.js';
-import { KDS } from './js/views/KDS.js';
-import { Login } from './js/views/Login.js';
-import { Projector } from './js/views/Projector.js';
-import { Results } from './js/views/Results.js';
-import * as api from './js/api.js';
+import { Admin } from './views/Admin.js';
+import { Cashier } from './views/Cashier.js';
+import { CustomerDisplay } from './views/CustomerDisplay.js';
+import { KDS } from './views/KDS.js';
+import { Login } from './views/Login.js';
+import { Projector } from './views/Projector.js';
+import { Results } from './views/Results.js';
+import * as api from './api.js';
 
 // APIをグローバルスコープで利用可能にする
 window.api = api;
@@ -36,23 +36,20 @@ const router = async () => {
     let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
 
     if (!match) {
-        match = { route: routes[0], isMatch: true }; // Not found, redirect to login
+        match = { route: routes[0], isMatch: true };
         history.pushState(null, null, "/");
     }
-    
-    // 前のビューのクリーンアップ処理を呼び出す
+
     if (currentView && typeof currentView.destroy === 'function') {
         currentView.destroy();
     }
 
     const view = new match.route.view(getParams(match));
-    currentView = view; // 現在のビューを保持
+    currentView = view;
 
-    // ★★★ エラー修正箇所 ★★★
-    // `view.render()`ではなく、正しく`view.getHtml()`を呼び出す
+    // view.getHtml() を使って HTML を取得して描画
     document.querySelector("#app").innerHTML = await view.getHtml();
-    
-    // afterRenderはDOM描画後に呼び出す
+
     if (typeof view.afterRender === 'function') {
         view.afterRender();
     }
@@ -63,7 +60,8 @@ const navigateTo = url => {
     router();
 };
 
-const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+const pathToRegex = path =>
+    new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const getParams = match => {
     if (!match.route.path.includes(":")) return {};
@@ -71,7 +69,6 @@ const getParams = match => {
     const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
     return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 };
-
 
 window.addEventListener("popstate", router);
 
