@@ -1,5 +1,5 @@
-// main.js（最終完全修正版）
-
+// js/main.js (最終確定版)
+import AbstractView from "./views/AbstractView.js";
 import { Admin } from './views/Admin.js';
 import { Cashier } from './views/Cashier.js';
 import { CustomerDisplay } from './views/CustomerDisplay.js';
@@ -15,6 +15,7 @@ window.api = api;
 let currentView = null;
 
 const router = async () => {
+    // Shits.jsへのルーティングを削除
     const routes = [
         { path: "/", view: Login },
         { path: "/login", view: Login },
@@ -26,20 +27,32 @@ const router = async () => {
         { path: "/results", view: Results }
     ];
 
-    const potentialMatches = routes.map(route => {
+    const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+
+    const getParams = match => {
+        const values = match.result.slice(1);
+        const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
+        return Object.fromEntries(keys.map((key, i) => {
+            return [key, values[i]];
+        }));
+    };
+
+    let match = routes.map(route => {
         return {
             route: route,
-            isMatch: location.pathname === route.path || (route.path.includes(":") && location.pathname.match(pathToRegex(route.path)))
+            result: location.pathname.match(pathToRegex(route.path))
         };
-    });
-
-    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+    }).find(potentialMatch => potentialMatch.result !== null);
 
     if (!match) {
-        match = { route: routes[0], isMatch: true };
+        match = {
+            route: routes[0],
+            result: [location.pathname]
+        };
         history.pushState(null, null, "/");
     }
-
+    
+    // 前のビューのクリーンアップ処理を呼び出す
     if (currentView && typeof currentView.destroy === 'function') {
         currentView.destroy();
     }
@@ -47,9 +60,8 @@ const router = async () => {
     const view = new match.route.view(getParams(match));
     currentView = view;
 
-    // view.getHtml() を使って HTML を取得して描画
     document.querySelector("#app").innerHTML = await view.getHtml();
-
+    
     if (typeof view.afterRender === 'function') {
         view.afterRender();
     }
@@ -58,16 +70,6 @@ const router = async () => {
 const navigateTo = url => {
     history.pushState(null, null, url);
     router();
-};
-
-const pathToRegex = path =>
-    new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
-
-const getParams = match => {
-    if (!match.route.path.includes(":")) return {};
-    const values = location.pathname.match(pathToRegex(match.route.path)).slice(1);
-    const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
-    return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 };
 
 window.addEventListener("popstate", router);
