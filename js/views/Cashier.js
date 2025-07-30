@@ -1,7 +1,6 @@
-// js/views/Cashier.js (最終確定版・完全版)
+// js/views/Cashier.js (API関数名 修正版)
 import AbstractView from "./AbstractView.js";
 
-// シンプルなカートクラス
 class Cart {
     constructor() {
         this.items = [];
@@ -17,12 +16,7 @@ class Cart {
     removeItem(productId) {
         const itemIndex = this.items.findIndex(item => item.id === productId);
         if (itemIndex > -1) {
-            const item = this.items[itemIndex];
-            if (item.quantity > 1) {
-                item.quantity--;
-            } else {
-                this.items.splice(itemIndex, 1);
-            }
+            this.items.splice(itemIndex, 1);
         }
     }
     getTotal() {
@@ -33,7 +27,7 @@ class Cart {
     }
 }
 
-export class Cashier extends AbstractView {
+export const Cashier = class extends AbstractView {
     constructor(params) {
         super(params);
         this.setTitle("レジ");
@@ -43,12 +37,10 @@ export class Cashier extends AbstractView {
     }
 
     async getHtml() {
-        // Your new CSS uses .page-container and panels, so we adapt the HTML structure
         return `
             <div class="page-container cashier-container">
                 <div class="main-panel product-grid-container">
-                    <div class="product-grid" id="product-grid">
-                        </div>
+                    <div class="product-grid" id="product-grid"></div>
                 </div>
                 <div class="side-panel order-sidebar">
                     <div class="order-summary">
@@ -72,7 +64,7 @@ export class Cashier extends AbstractView {
                             <button class="customer-btn age" data-value="adult">20-59</button>
                             <button class="customer-btn age" data-value="senior">60~</button>
                         </div>
-                         <div class="attribute-group">
+                        <div class="attribute-group">
                             <button class="customer-btn group" data-value="1">1名</button>
                             <button class="customer-btn group" data-value="2">2名</button>
                             <button class="customer-btn group" data-value="3">3名</button>
@@ -95,39 +87,52 @@ export class Cashier extends AbstractView {
         `;
     }
 
-    afterRender() {
+    async afterRender() {
         this.loadProducts();
         this.setupEventListeners();
     }
 
     async loadProducts() {
-        this.products = await window.api.getProducts();
-        const productGrid = document.getElementById('product-grid');
-        productGrid.innerHTML = this.products.map(p => `
-            <div class="product-card" data-product-id="${p.id}">
-                <div class="product-name">${p.name}</div>
-                <div class="product-price">¥${p.price}</div>
-            </div>
-        `).join('');
+        try {
+            // ★★★ ここを getProducts から fetchProducts に修正しました ★★★
+            this.products = await window.api.fetchProducts();
+            const productGrid = document.getElementById('product-grid');
+            if (this.products && productGrid) {
+                productGrid.innerHTML = this.products.map(p => `
+                    <div class="product-card" data-product-id="${p.id}">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-price">¥${p.price}</div>
+                    </div>
+                `).join('');
 
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const product = this.products.find(p => p.id == card.dataset.productId);
-                this.cart.addItem(product);
-                this.updateCartView();
-            });
-        });
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const product = this.products.find(p => p.id == card.dataset.productId);
+                        this.cart.addItem(product);
+                        this.updateCartView();
+                    });
+                });
+            }
+        } catch (error) {
+            console.error("商品リストの読み込みに失敗しました:", error);
+            alert("商品リストの読み込みに失敗しました。");
+        }
     }
-
+    
     updateCartView() {
         const cartItemsEl = document.getElementById('cart-items');
         const totalPriceEl = document.getElementById('total-price');
 
         cartItemsEl.innerHTML = this.cart.items.map(item => `
             <li class="list-item">
-                <span class="item-name">${item.name} x${item.quantity}</span>
-                <span class="item-price">¥${item.price * item.quantity}</span>
-                <button class="remove-item-btn btn btn-sm btn-delete" data-product-id="${item.id}">&times;</button>
+                <div class="item-details">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-info">x${item.quantity}</span>
+                </div>
+                <div class="item-controls">
+                    <span class="item-price">¥${item.price * item.quantity}</span>
+                    <button class="remove-item-btn btn btn-sm btn-delete" data-product-id="${item.id}">×</button>
+                </div>
             </li>
         `).join('');
 
@@ -140,19 +145,22 @@ export class Cashier extends AbstractView {
             });
         });
     }
-    
+
     setupEventListeners() {
         document.querySelectorAll('.attribute-group').forEach(group => {
             group.addEventListener('click', e => {
                 if (e.target.classList.contains('customer-btn')) {
-                    group.querySelectorAll('.customer-btn').forEach(btn => btn.classList.remove('active'));
+                    const currentActive = group.querySelector('.active');
+                    if (currentActive) {
+                        currentActive.classList.remove('active');
+                    }
                     e.target.classList.add('active');
                 }
             });
         });
 
         document.getElementById('clear-cart-btn').addEventListener('click', () => {
-            if (confirm('現在の注文内容をすべてクリアしますか？')) {
+            if (this.cart.items.length > 0 && confirm('現在の注文内容をすべてクリアしますか？')) {
                 this.resetCashier();
             }
         });
@@ -164,7 +172,7 @@ export class Cashier extends AbstractView {
             }
 
             document.getElementById('loading-overlay').style.display = 'flex';
-
+            
             const customerInfo = {
                 gender: document.querySelector('.customer-btn.gender.active')?.dataset.value || null,
                 age_group: document.querySelector('.customer-btn.age.active')?.dataset.value || null,
@@ -173,13 +181,13 @@ export class Cashier extends AbstractView {
             
             const couponCode = document.getElementById('coupon-code-input').value.trim();
 
-            const orderPayload = {
-                items: this.cart.items.map(item => ({ product_id: item.id, quantity: item.quantity })),
-                customer_info: customerInfo,
-                coupon_code: couponCode || null
-            };
-
             try {
+                const orderPayload = {
+                    items: this.cart.items.map(item => ({ product_id: item.id, quantity: item.quantity })),
+                    customer_info: customerInfo,
+                    coupon_code: couponCode || null
+                };
+
                 const newOrder = await window.api.createOrder(orderPayload);
                 
                 const printData = {
@@ -191,20 +199,20 @@ export class Cashier extends AbstractView {
                     coupon_code: couponCode || null,
                     feedback_url: `https://satoyu-order-system.vercel.app/feedback/${newOrder.id}`
                 };
-
+                
                 await window.api.printReceipt(printData);
                 alert(`注文 #${newOrder.display_id} を受け付けました。`);
                 this.resetCashier();
 
             } catch (error) {
                 console.error('会計処理に失敗しました:', error);
-                alert(`会計処理に失敗しました: ${error.message}`);
+                alert(`会計処理に失敗しました:\n${error.message}`);
             } finally {
                 document.getElementById('loading-overlay').style.display = 'none';
             }
         });
     }
-    
+
     resetCashier() {
         this.cart.clear();
         this.updateCartView();
